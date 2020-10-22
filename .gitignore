@@ -1,6 +1,7 @@
 .git/*
 env/
 venv/
+api/migrations/
 
 __pycache__/
 *.py[cod]
@@ -17,3 +18,4 @@ __pycache__/
 media/
 
 db.sqlite3
+
