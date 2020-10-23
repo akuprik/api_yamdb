@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'api',
-    #'api.UsersConfig',  # новое
 ]
 
 AUTH_USER_MODEL = 'api.CustomUser' # новое
