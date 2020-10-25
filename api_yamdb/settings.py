@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'api',
 ]
 
-AUTH_USER_MODEL = 'api.CustomUser' # новое
+AUTH_USER_MODEL = 'api.CustomUser'  # новое
 
 
 MIDDLEWARE = [
@@ -86,8 +86,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
-
 
 
 # Password validation

@@ -1,7 +1,7 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from rest_framework.response import Response
-from rest_framework import filters, generics, viewsets, status, views
+from rest_framework import viewsets, status, views
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.backends import TokenBackend
 
@@ -19,7 +19,6 @@ def send_mail_to_email(to, subject, body):
     и телом письма body
     """
     send_mail(subject=subject, message=body, from_email='akupr@yandex.ru', recipient_list=[to])
-
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -49,14 +48,14 @@ class GetConfirmCodeView(views.APIView):
             user.email,
             'Confirmation code',
             f'Confirmation code is\n{confirmation_code}\n '
-        )
+            )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         """
-            проверяет полноту данных запроса,
-            по email находит в БД пользователя user,
-            если такой находится выполняет действия action
+        проверяет полноту данных запроса,
+        по email находит в БД пользователя user,
+        если такой находится выполняет действия action
         """
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -71,8 +70,8 @@ class GetConfirmCodeView(views.APIView):
 
 class GetAuthPairToken(GetConfirmCodeView):
     """
-    Запрос пары токенов JWT (refresh, access)  по EMAIL и коду подтвержения
-    код подтвержения имеет полезную нагрузку payload,
+    Запрос пары токенов JWT (refresh, access)  по EMAIL и коду подтвержения.
+    Код подтвержения имеет полезную нагрузку payload,
     по ней идентифицируем пользователя,
     которому был этот код сформирован.
     Предварительные действия при post  аналогичны GetConfirmCodeView,
@@ -92,7 +91,5 @@ class GetAuthPairToken(GetConfirmCodeView):
             return Response(
                 {'refresh': str(refresh), 'access': str(refresh.access_token), },
                 status=status.HTTP_200_OK,
-            )
+                )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-

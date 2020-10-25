@@ -1,5 +1,4 @@
-from rest_framework import exceptions, serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework import serializers
 
 from .models import User
 
@@ -22,7 +21,7 @@ class EmailSerializer(serializers.Serializer):
 
 class GetAccessParTokenSerializer(serializers.Serializer):
     """
-    Серализатор запроса токена доступа
+    Сериализатор запроса токена доступа
     """
     email = serializers.EmailField(required=True)
     confirmation_code = serializers.CharField(required=True)
