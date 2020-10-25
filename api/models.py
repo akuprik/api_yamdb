@@ -3,6 +3,9 @@ from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 
 
+
+
+
 class CustomUser(AbstractUser):
     """
     Модель пользователя с добавленными полями
@@ -25,7 +28,6 @@ class CustomUser(AbstractUser):
         return {'user_id': self.id, 'email': self.email, 'username': self.username}
 
 
-
 User = get_user_model()
 
 
@@ -35,9 +37,6 @@ class Category(models.Model):
     name = models.TextField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
 
-    def __str__(self):
-        return self.name
-
 
 class Genre(models.Model):
     """Genres: comedy, thriller etc"""
@@ -45,33 +44,30 @@ class Genre(models.Model):
     name = models.TextField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
 
-    def __str__(self):
-        return self.name
-
 
 class Title(models.Model):
-    """***"""
+    """Модель Title"""
 
-    name = models.TextField()
-    #category = models.ForeignKey(Category, on_delete=models.SET_NULL)
-    description = models.TextField("description", null=True)
-    year = models.IntegerField()
+    name = models.TextField('name')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    description = models.TextField('description', null=True)
+    year = models.IntegerField('year')
 
 
 class Review(models.Model):
-    """***"""
+    """Модель Review"""
 
-    title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name="reviews")
-    text = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
-    score = models.IntegerField(null=True)
-    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name='reviews')
+    text = models.TextField('text')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    score = models.IntegerField('score', null=True)
+    pub_date = models.DateTimeField('Date of publication', auto_now_add=True)
 
 
 class Comment(models.Model):
-    """***"""
+    """Модель Comment"""
 
-    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name="comments")
-    text = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
-    pub_date = models.DateTimeField("Дата добавления", auto_now_add=True, db_index=True)
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField('text')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    pub_date = models.DateTimeField('Date of publication', auto_now_add=True, db_index=True)

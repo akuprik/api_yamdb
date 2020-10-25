@@ -4,8 +4,9 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     UserViewSet, GetConfirmCodeView,
-    GetAuthPairToken, TitleViewSet, ReviewViewSet,
-    CommentViewSet, CategoryViewSet, GenreViewSet
+    GetAuthPairToken, TitleViewSet,
+    ReviewViewSet, CommentViewSet,
+    CategoryViewSet, GenreViewSet
 )
 
 

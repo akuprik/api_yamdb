@@ -112,12 +112,16 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
+    """***"""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsOwnerOrReadOnly]
 
 
 class GenreViewSet(viewsets.ModelViewSet):
+    """***"""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsOwnerOrReadOnly]

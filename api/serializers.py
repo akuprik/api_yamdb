@@ -1,7 +1,7 @@
-#from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-#from rest_framework.relations import SlugRelatedField
-#from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueTogetherValidator
 
 from .models import Title, Review, Comment, User, Category, Genre
 
@@ -31,13 +31,14 @@ class GetAccessParTokenSerializer(serializers.Serializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    """***"""
+    """Сериализатор для Title"""
 
     class Meta:
         fields = '__all__'
         model = Title
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор для Category"""
 
     class Meta:
         fields = '__all__'
@@ -45,6 +46,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для Genre"""
 
     class Meta:
         fields = '__all__'
@@ -52,7 +54,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    """***"""
+    """Сериализатор для Review"""
 
     class Meta:
         fields = '__all__'
@@ -60,7 +62,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """***"""
+    """Сериализатор для Comment"""
 
     class Meta:
         fields = '__all__'
