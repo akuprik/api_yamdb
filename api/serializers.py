@@ -37,6 +37,7 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
+
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для Category"""
 
