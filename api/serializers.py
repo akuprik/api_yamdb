@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueTogetherValidator
 
-from .models import User
+from .models import User, Categories, Genres, Titles
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -25,3 +27,25 @@ class GetAccessParTokenSerializer(serializers.Serializer):
     """
     email = serializers.EmailField(required=True)
     confirmation_code = serializers.CharField(required=True)
+
+
+class CategoriesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = Categories
+
+
+class GenresSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = Genres
+
+
+class TitlesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = Titles
+        
