@@ -18,4 +18,8 @@ __pycache__/
 media/
 
 db.sqlite3
+<<<<<<< HEAD
 
+=======
+api/migrations/
+>>>>>>> 21de50af490b65b3dcb6765726d74d48b104d851
