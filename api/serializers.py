@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
+from django.db.models import Avg
 
 from .models import Title, Review, Comment, User, Category, Genre
 
@@ -30,20 +31,13 @@ class GetAccessParTokenSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(required=True)
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    """Сериализатор для Title"""
-
-    class Meta:
-        fields = '__all__'
-        model = Title
-
-
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для Category"""
 
     class Meta:
         fields = '__all__'
         model = Category
+        #lookup_field = "slug"
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -52,6 +46,18 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Genre
+        #lookup_field = "slug"
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для Title"""
+
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer()
+
+    class Meta:
+        fields = '__all__'
+        model = Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):

@@ -2,6 +2,7 @@ from rest_framework import viewsets, filters, mixins, status, views
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
@@ -104,40 +105,65 @@ class GetAuthPairToken(GetConfirmCodeView):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """***"""
+    """C пермишенами разобраться"""
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    #permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
+    pagination_class = PageNumberPagination
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+
+    filter_fields = ('category', 'genre')
+    search_fields = ('name', 'year')
+    lookup_field = 'slug'
+
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    """***"""
+    """C пермишенами разобраться"""
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    #permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
+    pagination_class = PageNumberPagination
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+    #lookup_field = 'slug'
 
 
 class GenreViewSet(viewsets.ModelViewSet):
-    """***"""
+    """C пермишенами разобраться"""
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    #permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
+    pagination_class = PageNumberPagination
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+    #lookup_field = 'slug'
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """***"""
+    """C пермишенами разобраться"""
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    #permission_classes = [IsOwnerOrReadOnly]
+    pagination_class = PageNumberPagination
+    permission_classes = [IsOwnerOrReadOnly]
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title']
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """***"""
+    """C пермишенами разобраться"""
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    #permission_classes = [IsOwnerOrReadOnly]
+    pagination_class = PageNumberPagination
+    permission_classes = [IsOwnerOrReadOnly]
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['review']
