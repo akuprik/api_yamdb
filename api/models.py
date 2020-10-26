@@ -14,7 +14,7 @@ class Category(models.Model):
         return self.name
 
 
-class Genres(models.Model):
+class Genre(models.Model):
     """Genres: comedy, thriller etc"""
 
     name = models.TextField(max_length=200)
@@ -24,18 +24,18 @@ class Genres(models.Model):
         return self.name
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """***"""
 
     name = models.TextField()
     description = models.TextField("description", null=True)
-    year = models.DateTimeField(
-        "Год создания", auto_now_add=True
-    )
+    year = models.IntegerField("Год создания", default=1990)
     category = models.ForeignKey(
             Category,
             on_delete=models.SET_NULL,
             )
+    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL)
+    
 
     def __str__(self):
         return self.name
