@@ -5,20 +5,22 @@ from .views import (
     UserViewSet,
     GetConfirmCodeView,
     GetAuthPairToken,
-    CategoriesViewSet, 
-    GenresViewSet, 
-    TitlesViewSet,
+    CategoryViewSet, 
+    GenreViewSet, 
+    TitleViewSet,
+    CommentViewSet,
+    ReviewViewSet,
     )
 
 
 v1_router = DefaultRouter()
-v1_router.register('categories', CategoriesViewSet)
-v1_router.register('categories/{slug}', CategoriesViewSet)
-v1_router.register('genres', GenresViewSet)
-v1_router.register('genres/{slug}', GenresViewSet)
-v1_router.register('tetles', TitlesViewSet)
-v1_router.register('tetles/{titles_id}', TitlesViewSet)
-v1_router.register('users', UserViewSet,)
+
+v1_router.register('users', UserViewSet)
+v1_router.register('categories', CategoryViewSet)
+v1_router.register('genres', GenreViewSet)
+v1_router.register('titles', TitleViewSet)
+v1_router.register('reviews', ReviewViewSet)
+v1_router.register('comments', CommentViewSet)
 
 
 urlpatterns = [
