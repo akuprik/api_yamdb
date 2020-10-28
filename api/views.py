@@ -16,7 +16,8 @@ from .models import User
 from .models import Title, Comment, Review, Category, Genre
 from .serializers import (
     CommentSerializer, ReviewSerializer, TitleSerializer,
-    UserSerializer, EmailSerializer, GetAccessParTokenSerializer, CategorySerializer, GenreSerializer,
+    UserSerializer, EmailSerializer, GetAccessParTokenSerializer,
+    CategorySerializer, GenreSerializer,
 )
 from .permissions import IsOwnerOrReadOnly
 
@@ -216,8 +217,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     filter_fields = ('category', 'genre')
     search_fields = ('name', 'year')
-    lookup_field = 'slug'
-
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -230,7 +229,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
-    #lookup_field = 'slug'
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -243,7 +241,6 @@ class GenreViewSet(viewsets.ModelViewSet):
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
-    #lookup_field = 'slug'
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -268,3 +265,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['review']
+
+
+
