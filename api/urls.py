@@ -9,14 +9,13 @@ from .views import (
     )
 
 router = DefaultRouter()
-router.register('users', UserViewSet, basename='PostViewSet')
+router.register('users', UserViewSet, )
 
 
 urlpatterns = [
     path('v1/auth/email/', GetConfirmCodeView.as_view(), name='confirmation_code'),
     path('v1/auth/token/', GetAuthPairToken.as_view(), name='token_obtain_pair'),
     path('v1/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
     path('v1/', include(router.urls)),
 
     ]

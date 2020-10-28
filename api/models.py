@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User, AbstractUser
+from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -11,11 +11,11 @@ class CustomUser(AbstractUser):
     """
     email = models.EmailField(unique=True, null=False)
     ROLE_LIST = (
-        ('u', 'user'),
-        ('m', 'moderator'),
-        ('a', 'administrator'),
-    )
-    role = models.CharField(max_length=1, choices=ROLE_LIST, default='u')
+        ('user', 'Простой пользователь'),
+        ('moderator', 'Пользовтель для модерации'),
+        ('admin', 'Администратор сайта'),
+        )
+    role = models.CharField(max_length=9, choices=ROLE_LIST, default='user')
     bio = models.TextField(default='')
 
     def get_payload(self):
@@ -24,6 +24,8 @@ class CustomUser(AbstractUser):
         """
         return {'user_id': self.id, 'email': self.email, 'username': self.username}
 
+    class Meta:
+        ordering = ("username",)
 
 
 User = get_user_model()
