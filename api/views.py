@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated,
-    IsAuthenticatedOrReadOnly
+    IsAuthenticatedOrReadOnly,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -15,11 +15,11 @@ from .models import User
 
 from .models import Title, Comment, Review, Category, Genre
 from .serializers import (
-    CommentSerializer, ReviewSerializer, TitleSerializer,
+    CommentSerializer, ReviewSerializer, TitleSerializer_get,
     UserSerializer, EmailSerializer, GetAccessParTokenSerializer,
-    CategorySerializer, GenreSerializer,
+    CategorySerializer, GenreSerializer, TitleSerializer_post
 )
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsAdminOrReadOnly
 
 import django_filters.rest_framework
 from django.shortcuts import get_object_or_404, render
@@ -34,7 +34,7 @@ from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework.decorators import action
 
 from api_yamdb.settings import SIMPLE_JWT
-from .models import User, Categories, Genres, Titles
+from .models import User, Category, Genre, Title
 from .serializers import (
     UserSerializer, EmailSerializer, GetAccessParTokenSerializer
     )
@@ -210,10 +210,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     """C пермишенами разобраться"""
 
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return TitleSerializer_get
+        return TitleSerializer_post
 
     filter_fields = ('category', 'genre')
     search_fields = ('name', 'year')
@@ -224,7 +228,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
 
     filter_backends = [filters.SearchFilter]
@@ -236,7 +240,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
 
     filter_backends = [filters.SearchFilter]
@@ -249,7 +253,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['title']
@@ -261,7 +265,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     filter_backends = [filters.SearchFilter]
     search_fields = ['review']

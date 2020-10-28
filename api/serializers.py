@@ -69,36 +69,57 @@ class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для Category"""
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug',)
         model = Category
-
+        lookup_field = 'slug'
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для Genre"""
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug',)
         model = Genre
+        lookup_field = 'slug'
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    """Сериализатор для Title"""
-
-    # genre = GenreSerializer(many=True, read_only=True)
-    # category = CategorySerializer()
-    genre = serializers.SlugRelatedField(queryset=Genre.objects.all(), many=True, slug_field="slug")
-    category = serializers.SlugRelatedField(queryset=Category.objects.all(), slug_field="slug")
-
+class TitleSerializer_get(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
     class Meta:
-        fields = '__all__'
+        fields = ("name", "year", "description", "genre", "category")
         model = Title
 
+def get_rating(self, obj):
+        rating = obj.reviews.all().aggregate(Avg('score')).get('score__avg')
+        if rating is None:
+            return 0
+        return rating
+
+class TitleSerializer_post(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field="slug",
+        many=True,
+        )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field="slug",
+    )
+    class Meta:
+        fields = ("name", "year", "description", "genre", "category")
+        model = Title
+
+    def get_rating(self, obj):
+        rating = obj.reviews.all().aggregate(Avg('score')).get('score__avg')
+        if rating is None:
+            return 0
+        return rating
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор для Review"""
 
     class Meta:
-        fields = '__all__'
+        fields = ('title', 'text', 'author', 'score', 'pub_date',)
         model = Review
 
 
@@ -106,5 +127,5 @@ class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор для Comment"""
 
     class Meta:
-        fields = '__all__'
+        fields = ('review', 'text', 'author', 'pub_date',)
         model = Comment
