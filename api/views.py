@@ -5,31 +5,50 @@ from rest_framework.response import Response
 from rest_framework import filters, generics, status, viewsets
 from rest_framework.viewsets import ViewSetMixin
 from rest_framework import viewsets, status, views
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.backends import TokenBackend
+from rest_framework.decorators import action
 
 from api_yamdb.settings import SIMPLE_JWT
 from .models import User, Categories, Genres, Titles
 from .serializers import (
     UserSerializer, EmailSerializer, GetAccessParTokenSerializer
     )
+from .user_action_permissions import IsAdministratorOrSuperUser
 
 
 def send_mail_to_email(to, subject, body):
     """
-    Отправляет EMAIL по адресу to
-    c темой subject
-    и телом письма body
+    Отправляет EMAIL по адресу TO:
+    c темой SUBJECT:
+    и телом письма BODY:
     """
-    send_mail(subject=subject, message=body, from_email='akupr@yandex.ru', recipient_list=[to])
+    send_mail(subject=subject, message=body, from_email='a@ya.ru', recipient_list=[to])
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-    Для работы с пользователями (чтение, создание редактирование, удаление)
+    Для работы с пользователями (чтение, создание, обновление)
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsAdministratorOrSuperUser,
+        ]
+    lookup_field = 'username'
+
+    @action(detail=False, methods=['get', 'patch', ], permission_classes=[IsAuthenticated, ])
+    def me(self, request, **kwargs):
+        """
+        Обрабатывает users/me/
+        """
+        partial = kwargs.pop('partial', True)
+        serializer = self.get_serializer(request.user, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 class GetConfirmCodeView(views.APIView):
