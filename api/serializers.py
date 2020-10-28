@@ -11,9 +11,14 @@ class UserSerializer(serializers.ModelSerializer):
     """
     Сериализатор для модели User
     """
+    role = serializers.ChoiceField(choices=User.ROLE_LIST)
+    username = serializers.CharField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
+    email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
+    bio = serializers.CharField(default='', allow_blank=True, )
+
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ('first_name', 'last_name', 'username', 'bio', 'email', 'role', )
 
 
 class EmailSerializer(serializers.Serializer):
@@ -37,7 +42,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Category
-        #lookup_field = "slug"
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -46,7 +50,6 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Genre
-        #lookup_field = "slug"
 
 
 class TitleSerializer(serializers.ModelSerializer):

@@ -2,8 +2,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 
-<<<<<<< HEAD
-=======
 
 class CustomUser(AbstractUser):
     """
@@ -27,7 +25,6 @@ class CustomUser(AbstractUser):
         return {'user_id': self.id, 'email': self.email, 'username': self.username}
 
 
->>>>>>> 21de50af490b65b3dcb6765726d74d48b104d851
 User = get_user_model()
 
 
@@ -37,12 +34,6 @@ class Category(models.Model):
     name = models.TextField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
 
-<<<<<<< HEAD
-    def __str__(self):
-        return self.name
-
-=======
->>>>>>> 21de50af490b65b3dcb6765726d74d48b104d851
 
 class Genre(models.Model):
     """Genres: comedy, thriller etc"""
@@ -50,36 +41,15 @@ class Genre(models.Model):
     name = models.TextField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
 
-<<<<<<< HEAD
-    def __str__(self):
-        return self.name
-
-
-class Title(models.Model):
-    """***"""
-
-    name = models.TextField()
-    description = models.TextField("description", null=True)
-    year = models.IntegerField("Год создания", default=1990)
-    category = models.ForeignKey(
-            Category,
-            on_delete=models.SET_NULL,
-            )
-    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL)
-    
-
-    def __str__(self):
-        return self.name
-=======
 
 class Title(models.Model):
     """Модель Title"""
 
     name = models.TextField('name')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='titles')
-    genre = models.ManyToManyField(Genre)
+    genre = models.ManyToManyField(Genre, blank=True, related_name="genres,")
     description = models.TextField('description', null=True)
-    year = models.IntegerField('year')
+    year = models.PositiveIntegerField('year')
 
 
 class Review(models.Model):
@@ -88,7 +58,7 @@ class Review(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField('text')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
-    score = models.IntegerField('score', null=True)
+    score = models.PositiveIntegerField('score', null=True)
     pub_date = models.DateTimeField('Date of publication', auto_now_add=True)
 
 
@@ -99,4 +69,3 @@ class Comment(models.Model):
     text = models.TextField('text')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     pub_date = models.DateTimeField('Date of publication', auto_now_add=True, db_index=True)
->>>>>>> 21de50af490b65b3dcb6765726d74d48b104d851
