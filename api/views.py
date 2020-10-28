@@ -1,6 +1,9 @@
-from django.shortcuts import get_object_or_404
+import django_filters.rest_framework
+from django.shortcuts import get_object_or_404, render
 from django.core.mail import send_mail
 from rest_framework.response import Response
+from rest_framework import filters, generics, status, viewsets
+from rest_framework.viewsets import ViewSetMixin
 from rest_framework import viewsets, status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,7 +11,7 @@ from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework.decorators import action
 
 from api_yamdb.settings import SIMPLE_JWT
-from .models import User
+from .models import User, Categories, Genres, Titles
 from .serializers import (
     UserSerializer, EmailSerializer, GetAccessParTokenSerializer
     )
@@ -112,3 +115,16 @@ class GetAuthPairToken(GetConfirmCodeView):
                 status=status.HTTP_200_OK,
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CategoriesViewSet(viewsets.ModelViewSet):
+    pass
+
+
+class GenresViewSet(viewsets.ModelViewSet):
+    pass
+
+
+class TitlesViewSet(viewsets.TitleViewSet):
+    pass
+
