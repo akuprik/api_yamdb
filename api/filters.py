@@ -12,7 +12,7 @@ class TitleFilter(filters.FilterSet):
         field_name="year"
     )
     name = filters.CharFilter(
-        field_name="name"
+        field_name="name", lookup_expr="contains"
     )
 
     class Meta:
