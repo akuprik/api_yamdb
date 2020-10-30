@@ -86,7 +86,7 @@ class TitleSerializer_get(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
     class Meta:
-        fields = ("name", "year", "description", "genre", "category")
+        fields = ("id", "name", "year", "description", "genre", "category")
         model = Title
 
 def get_rating(self, obj):
@@ -106,7 +106,7 @@ class TitleSerializer_post(serializers.ModelSerializer):
         slug_field="slug",
     )
     class Meta:
-        fields = ("name", "year", "description", "genre", "category")
+        fields = ("id", "name", "year", "description", "genre", "category")
         model = Title
 
     def get_rating(self, obj):

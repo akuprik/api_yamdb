@@ -1,4 +1,4 @@
-from rest_framework import viewsets, filters, mixins, status, views
+from rest_framework import viewsets, filters, mixins, status, views, generics
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from rest_framework.response import Response
@@ -13,6 +13,7 @@ from rest_framework_simplejwt.backends import TokenBackend
 from api_yamdb.settings import SIMPLE_JWT
 from .models import User
 
+from .filters import TitleFilter
 from .models import Title, Comment, Review, Category, Genre
 from .serializers import (
     CommentSerializer, ReviewSerializer, TitleSerializer_get,
@@ -212,37 +213,46 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TitleFilter
+
 
     def get_serializer_class(self):
-        if self.action == 'list':
+        if self.action == 'retrieve' or self.action == 'list':
             return TitleSerializer_get
         return TitleSerializer_post
 
-    filter_fields = ('category', 'genre')
-    search_fields = ('name', 'year')
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+
+class CategoryViewSet(viewsets.GenericViewSet, 
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   ):
     """C пермишенами разобраться"""
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
-
+    lookup_field = 'slug'
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(viewsets.GenericViewSet,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   ):
     """C пермишенами разобраться"""
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
-
+    lookup_field = 'slug'
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
 

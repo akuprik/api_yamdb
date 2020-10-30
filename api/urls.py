@@ -20,6 +20,7 @@ v1_router.register('categories', CategoryViewSet)
 v1_router.register('genres', GenreViewSet)
 v1_router.register('titles', TitleViewSet)
 v1_router.register('reviews', ReviewViewSet)
+v1_router.register(r'titles/(?P<title_id>[0-9]+)/reviews', ReviewViewSet)
 v1_router.register('comments', CommentViewSet)
 
 
