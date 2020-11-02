@@ -1,56 +1,32 @@
-from rest_framework import viewsets, filters, mixins, status, views, generics, permissions
-from django.shortcuts import get_object_or_404
-from django.core.mail import send_mail
-from rest_framework.response import Response
 from functools import partial
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.backends import TokenBackend
-from api_yamdb.settings import SIMPLE_JWT
-from .models import User
-
-from .filters import TitleFilter
-from .models import Title, Comment, Review, Category, Genre
-from .serializers import (
-    CommentSerializer, ReviewSerializer, TitleSerializer_get,
-    UserSerializer, EmailSerializer, GetAccessParTokenSerializer,
-    CategorySerializer, GenreSerializer, TitleSerializer_post
-)
-from .permissions import IsAdminOrReadOnly
 
 import django_filters.rest_framework
-from django.shortcuts import get_object_or_404, render
 from django.core.mail import send_mail
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404, render
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import (filters, generics, mixins, permissions, status,
+                            views, viewsets)
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSetMixin
-from rest_framework import viewsets, status, views
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.backends import TokenBackend
-from rest_framework.decorators import action
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from api_yamdb.settings import SIMPLE_JWT
-from .models import User, Category, Genre, Title
-from .serializers import (
-    UserSerializer, EmailSerializer, GetAccessParTokenSerializer
-    )
-from django.db.models import Avg
 
 from .filters import TitleFilter
-from .user_action_permissions import IsAdministratorOrSuperUser
-#from .permissions import IsOwnerOrReadOnly
+from .models import Category, Comment, Genre, Review, Title, User
 from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
-from .models import User
-from .models import Title, Comment, Review, Category, Genre
-from .serializers import (
-    CommentSerializer, ReviewSerializer,
-    UserSerializer, EmailSerializer, GetAccessParTokenSerializer,
-    CategorySerializer, GenreSerializer, TitleSerializer_get, TitleSerializer_post
-)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          EmailSerializer, GenreSerializer,
+                          GetAccessParTokenSerializer, ReviewSerializer,
+                          TitleSerializer_get, TitleSerializer_post,
+                          UserSerializer)
+from .user_action_permissions import IsAdministratorOrSuperUser
 
 
 def send_mail_to_email(to, subject, body):
@@ -59,7 +35,12 @@ def send_mail_to_email(to, subject, body):
     c темой SUBJECT:
     и телом письма BODY:
     """
-    send_mail(subject=subject, message=body, from_email='a@ya.ru', recipient_list=[to])
+    send_mail(
+        subject=subject,
+        message=body,
+        from_email='a@ya.ru',
+        recipient_list=[to]
+        )
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -74,13 +55,21 @@ class UserViewSet(viewsets.ModelViewSet):
         ]
     lookup_field = 'username'
 
-    @action(detail=False, methods=['get', 'patch', ], permission_classes=[IsAuthenticated, ])
+    @action(
+        detail=False,
+        methods=['get', 'patch', ],
+        permission_classes=[IsAuthenticated, ]
+        )
     def me(self, request, **kwargs):
         """
         Обрабатывает users/me/
         """
         partial = kwargs.pop('partial', True)
-        serializer = self.get_serializer(request.user, data=request.data, partial=partial)
+        serializer = self.get_serializer(
+                            request.user,
+                            data=request.data,
+                            partial=partial
+                            )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
@@ -89,7 +78,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class GetConfirmCodeView(views.APIView):
     """
     Запрос на получение confirmation_code,
-    если есть такой пользователь отправляем на присланный EMAIL код подтвержения.
+    если есть такой пользователь,
+    отправляем на присланный EMAIL код подтвержения.
     Код подтверждения формируется как токен JWT с payload пользователя
     """
     serializer_class = EmailSerializer
@@ -146,16 +136,23 @@ class GetAuthPairToken(GetConfirmCodeView):
         if payload == user.get_payload():
             refresh = RefreshToken.for_user(user)
             return Response(
-                {'refresh': str(refresh), 'access': str(refresh.access_token), },
+                {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    },
                 status=status.HTTP_200_OK,
                 )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
 
 
 class GetConfirmCodeView(views.APIView):
     """
     Запрос на получение confirmation_code,
-    если есть такой пользователь отправляем на присланный EMAIL код подтвержения.
+    если есть такой пользователь
+    отправляем на присланный EMAIL код подтвержения.
     Код подтверждения формируется как токен JWT с payload пользователя
     """
     serializer_class = EmailSerializer
@@ -212,7 +209,10 @@ class GetAuthParToken(GetConfirmCodeView):
         if payload == user.get_payload():
             refresh = RefreshToken.for_user(user)
             return Response(
-                {'refresh': str(refresh), 'access': str(refresh.access_token), },
+                {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    },
                 status=status.HTTP_200_OK,
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -238,11 +238,12 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer_post
 
 
-class CategoryViewSet(viewsets.GenericViewSet,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   ):
+class CategoryViewSet(
+                    viewsets.GenericViewSet,
+                    mixins.CreateModelMixin,
+                    mixins.DestroyModelMixin,
+                    mixins.ListModelMixin,
+                    ):
     """C пермишенами разобраться"""
 
     queryset = Category.objects.all()
@@ -270,7 +271,6 @@ class GenreViewSet(viewsets.GenericViewSet,
     search_fields = ['name']
 
 
-
 class ReviewViewSet(viewsets.ModelViewSet):
     """***"""
 
@@ -283,7 +283,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     ]
     lookup_field = 'pk'
 
-
     def get_serializer_context(self):
         """передача дополнительных аргументов"""
         context = super(ReviewViewSet, self).get_serializer_context()
@@ -295,7 +294,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         """***"""
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
-
 
     def get_queryset(self):
         """***"""

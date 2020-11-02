@@ -1,12 +1,10 @@
-# почистить и сгруппировать импорты
-
 from django.contrib.auth import get_user_model
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
-from django.db.models import Avg
 
-from .models import Title, Review, Comment, User, Category, Genre
+from .models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -14,13 +12,34 @@ class UserSerializer(serializers.ModelSerializer):
     Сериализатор для модели User
     """
     role = serializers.ChoiceField(choices=User.ROLE_LIST)
-    username = serializers.CharField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
-    email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
+    username = serializers.CharField(
+                        required=True,
+                        validators=[
+                            UniqueValidator(
+                                queryset=User.objects.all()
+                                )
+                            ]
+                        )
+    email = serializers.EmailField(
+                        required=True,
+                        validators=[
+                            UniqueValidator(
+                                queryset=User.objects.all()
+                                )
+                            ]
+                        )
     bio = serializers.CharField(default='', allow_blank=True, )
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'bio', 'email', 'role', )
+        fields = (
+                'first_name',
+                'last_name',
+                'username',
+                'bio',
+                'email',
+                'role',
+                )
 
 
 class EmailSerializer(serializers.Serializer):
@@ -46,6 +65,7 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         lookup_field = 'slug'
 
+
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для Genre"""
 
@@ -59,8 +79,17 @@ class TitleSerializer_get(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
+
     class Meta:
-        fields = ("id", "name", "year", "rating", "description", "genre", "category")
+        fields = (
+                "id",
+                "name",
+                "year",
+                "rating",
+                "description",
+                "genre",
+                "category"
+                )
         model = Title
 
     def get_rating(self, obj):
@@ -68,6 +97,7 @@ class TitleSerializer_get(serializers.ModelSerializer):
         if rating is None:
             return None
         return rating
+
 
 class TitleSerializer_post(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
@@ -79,6 +109,7 @@ class TitleSerializer_post(serializers.ModelSerializer):
         queryset=Category.objects.all(),
         slug_field="slug",
     )
+
     class Meta:
         fields = ("id", "name", "year", "description", "genre", "category")
         model = Title
@@ -93,7 +124,10 @@ class TitleSerializer_post(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор для Review"""
 
-    author = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    author = serializers.SlugRelatedField(
+                            slug_field='username',
+                            read_only=True
+                            )
 
     def validate(self, data):
         """проверка на наличие оценки"""
