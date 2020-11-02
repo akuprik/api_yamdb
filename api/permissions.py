@@ -19,6 +19,10 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         return (
             obj.author == request.user
             or request.method in permissions.SAFE_METHODS
+<<<<<<< HEAD
             # добавил строку
             or request.user.role in ('moderator', 'admin')
+=======
+            or request.user.role in ('moderator', 'admin')  # Добавил строку
+>>>>>>> eb22a9ce8d6b2c979f8336a38e865fd94c7a58b4
         )
