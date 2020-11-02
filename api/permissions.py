@@ -14,6 +14,9 @@ class IsAdminOrReadOnly(BasePermission):
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
+    """
+    Разрешения изменений модераторам и админам
+    """
 
     def has_object_permission(self, request, view, obj):
         return (

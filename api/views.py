@@ -256,7 +256,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = [
         IsOwnerOrReadOnly,
-        #IsStaffOrReadOnly,
         IsAuthenticatedOrReadOnly,
 
     ]
@@ -264,13 +263,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
     def get_serializer_context(self):
-        """***"""
+        """передача дополнительных аргументов"""
         context = super(ReviewViewSet, self).get_serializer_context()
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         context.update({'title': title})
         return context
 
     def perform_create(self, serializer):
+        """***"""
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
 
@@ -289,7 +289,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = [
         IsOwnerOrReadOnly,
-        #IsStaffOrReadOnly,
         IsAuthenticatedOrReadOnly,
     ]
 
