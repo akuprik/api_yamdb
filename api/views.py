@@ -188,36 +188,6 @@ class GetConfirmCodeView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class GetAuthParToken(GetConfirmCodeView):
-    """
-    Запрос пары токенов JWT (refresh, access)  по EMAIL и коду подтвержения.
-    Код подтвержения имеет полезную нагрузку payload,
-    по ней идентифицируем пользователя,
-    которому был этот код сформирован.
-    Предварительные действия при post  аналогичны GetConfirmCodeView,
-    отличия вынесены в action
-    """
-    serializer_class = GetAccessParTokenSerializer
-
-    def action(self, user, token, serializer):
-        """
-        Проверяет соответствие payload из confirmation_code
-        и payload пользователя определенного по email.
-        формирует пару JWT-токена доступа.
-        """
-        payload = token.decode(self.request.data.get('confirmation_code'))
-        if payload == user.get_payload():
-            refresh = RefreshToken.for_user(user)
-            return Response(
-                {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                    },
-                status=status.HTTP_200_OK,
-                )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class TitleViewSet(viewsets.ModelViewSet):
     """C пермишенами разобраться"""
 
