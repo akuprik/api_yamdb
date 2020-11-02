@@ -1,7 +1,8 @@
-from rest_framework import viewsets, filters, mixins, status, views, generics
+from rest_framework import viewsets, filters, mixins, status, views, generics, permissions
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from rest_framework.response import Response
+from functools import partial
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -26,20 +27,30 @@ import django_filters.rest_framework
 from django.shortcuts import get_object_or_404, render
 from django.core.mail import send_mail
 from rest_framework.response import Response
-from rest_framework import filters, generics, status, viewsets
 from rest_framework.viewsets import ViewSetMixin
 from rest_framework import viewsets, status, views
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework.decorators import action
-
 from api_yamdb.settings import SIMPLE_JWT
 from .models import User, Category, Genre, Title
 from .serializers import (
     UserSerializer, EmailSerializer, GetAccessParTokenSerializer
     )
+from django.db.models import Avg
+
+from .filters import TitleFilter
 from .user_action_permissions import IsAdministratorOrSuperUser
+#from .permissions import IsOwnerOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+from .models import User
+from .models import Title, Comment, Review, Category, Genre
+from .serializers import (
+    CommentSerializer, ReviewSerializer,
+    UserSerializer, EmailSerializer, GetAccessParTokenSerializer,
+    CategorySerializer, GenreSerializer, TitleSerializer_get, TitleSerializer_post
+)
 
 
 def send_mail_to_email(to, subject, body):
@@ -180,7 +191,7 @@ class GetConfirmCodeView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class GetAuthPairToken(GetConfirmCodeView):
+class GetAuthParToken(GetConfirmCodeView):
     """
     Запрос пары токенов JWT (refresh, access)  по EMAIL и коду подтвержения.
     Код подтвержения имеет полезную нагрузку payload,
@@ -216,6 +227,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
 
+    def get_serializer_class(self):
+        if self.action == 'retrieve' or self.action == 'list':
+            return TitleSerializer_get
+        return TitleSerializer_post
 
     def get_serializer_class(self):
         if self.action == 'retrieve' or self.action == 'list':
@@ -223,9 +238,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer_post
 
 
-
-
-class CategoryViewSet(viewsets.GenericViewSet, 
+class CategoryViewSet(viewsets.GenericViewSet,
                    mixins.CreateModelMixin,
                    mixins.DestroyModelMixin,
                    mixins.ListModelMixin,
@@ -257,28 +270,58 @@ class GenreViewSet(viewsets.GenericViewSet,
     search_fields = ['name']
 
 
-class CommentViewSet(viewsets.ModelViewSet):
-    """C пермишенами разобраться"""
-
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    pagination_class = PageNumberPagination
-    permission_classes = [IsAdminOrReadOnly]
-
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['title']
-
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """C пермишенами разобраться"""
+    """***"""
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [
+        IsOwnerOrReadOnly,
+        IsAuthenticatedOrReadOnly,
+    ]
+    lookup_field = 'pk'
 
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['review']
+
+    def get_serializer_context(self):
+        """передача дополнительных аргументов"""
+        context = super(ReviewViewSet, self).get_serializer_context()
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        context.update({'title': title})
+        return context
+
+    def perform_create(self, serializer):
+        """***"""
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        serializer.save(author=self.request.user, title=title)
 
 
+    def get_queryset(self):
+        """***"""
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return title.reviews.all()
 
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """***"""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = [
+        IsOwnerOrReadOnly,
+        IsAuthenticatedOrReadOnly,
+    ]
+
+    def get_queryset(self):
+        """***"""
+
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        """***"""
+
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        serializer.save(review=review, author=self.request.user)
