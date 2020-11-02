@@ -1,6 +1,6 @@
 # почистить и сгруппировать импорты
-
-from rest_framework import viewsets, filters, mixins, status, views
+from functools import partial
+from rest_framework import viewsets, filters, mixins, status, views, permissions
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -23,7 +23,7 @@ from django.db.models import Avg
 from .filters import TitleFilter
 from .user_action_permissions import IsAdministratorOrSuperUser
 #from .permissions import IsOwnerOrReadOnly
-from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly, IsStaffOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from .models import User
 from .models import Title, Comment, Review, Category, Genre
 from .serializers import (
@@ -248,10 +248,6 @@ class GenreViewSet(viewsets.GenericViewSet,
 
 
 
-
-
-
-
 class ReviewViewSet(viewsets.ModelViewSet):
     """***"""
 
@@ -260,13 +256,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = [
         IsOwnerOrReadOnly,
-        IsStaffOrReadOnly,
         IsAuthenticatedOrReadOnly,
 
     ]
 
 
     def get_serializer_context(self):
+        """***"""
         context = super(ReviewViewSet, self).get_serializer_context()
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         context.update({'title': title})
@@ -292,7 +288,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = [
         IsOwnerOrReadOnly,
-        IsStaffOrReadOnly,
         IsAuthenticatedOrReadOnly,
     ]
 

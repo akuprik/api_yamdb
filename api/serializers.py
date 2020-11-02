@@ -104,13 +104,14 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username', read_only=True)
 
     def validate(self, data):
+        """проверка на наличие оценки"""
         title = self.context.get('title')
         request = self.context.get('request')
         if (
             request.method != 'PATCH' and
             Review.objects.filter(title=title, author=request.user).exists()
         ):
-            raise serializers.ValidationError('Score already exists')
+            raise serializers.ValidationError('Оценка уже существует')
         return data
 
     class Meta:
