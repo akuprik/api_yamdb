@@ -61,7 +61,6 @@ class TitleSerializer_get(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
-
     class Meta:
         fields = ("id", "name", "year", "description", "genre", "category")
         model = Title
@@ -74,7 +73,6 @@ class TitleSerializer_get(serializers.ModelSerializer):
 
 
 class TitleSerializer_post(serializers.ModelSerializer):
-
 
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),

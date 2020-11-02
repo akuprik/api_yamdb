@@ -260,10 +260,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = [
         IsOwnerOrReadOnly,
-        IsStaffOrReadOnly,
+        #IsStaffOrReadOnly,
         IsAuthenticatedOrReadOnly,
 
     ]
+    lookup_field = 'pk'
 
 
     def get_serializer_context(self):
@@ -279,7 +280,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """***"""
-
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         return title.reviews.all()
 
@@ -292,7 +292,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = [
         IsOwnerOrReadOnly,
-        IsStaffOrReadOnly,
+        #IsStaffOrReadOnly,
         IsAuthenticatedOrReadOnly,
     ]
 
