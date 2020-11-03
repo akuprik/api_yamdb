@@ -96,7 +96,6 @@ class TitleSerializer_post(serializers.ModelSerializer):
         return rating
 
 
-
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор для Review"""
 
