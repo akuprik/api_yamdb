@@ -1,35 +1,31 @@
-# почистить и сгруппировать импорты
-from functools import partial
-from rest_framework import viewsets, filters, mixins, status, views, permissions
+from rest_framework import (
+    viewsets, filters,
+    mixins, status, views,
+)
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.viewsets import ViewSetMixin
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
 )
-from django_filters.rest_framework import DjangoFilterBackend
-import django_filters.rest_framework
-from django.shortcuts import get_object_or_404, render
-from django.core.mail import send_mail
-from rest_framework.response import Response
-from rest_framework.viewsets import ViewSetMixin
-from rest_framework import viewsets, status, views
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404, render
+from django.core.mail import send_mail
 from api_yamdb.settings import SIMPLE_JWT
-from django.db.models import Avg
 
 from .filters import TitleFilter
 from .user_action_permissions import IsAdministratorOrSuperUser
-#from .permissions import IsOwnerOrReadOnly
 from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
-from .models import User
-from .models import Title, Comment, Review, Category, Genre
+from .models import User, Title, Comment, Review, Category, Genre
 from .serializers import (
     CommentSerializer, ReviewSerializer,
-    UserSerializer, EmailSerializer, GetAccessParTokenSerializer,
-    CategorySerializer, GenreSerializer, TitleSerializer_get, TitleSerializer_post
+    UserSerializer, EmailSerializer,
+    GetAccessParTokenSerializer, CategorySerializer,
+    GenreSerializer, TitleSerializer_get, TitleSerializer_post,
 )
 
 
@@ -249,7 +245,7 @@ class GenreViewSet(viewsets.GenericViewSet,
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """***"""
+    """ReviewViewSet"""
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -257,32 +253,30 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [
         IsOwnerOrReadOnly,
         IsAuthenticatedOrReadOnly,
-
     ]
     lookup_field = 'pk'
 
 
     def get_serializer_context(self):
-        """передача дополнительных аргументов"""
+        """получение дополнительных аргументов"""
         context = super(ReviewViewSet, self).get_serializer_context()
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         context.update({'title': title})
         return context
 
+    def get_queryset(self):
+        """получение ревью на тайтл"""
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return title.reviews.all()
+
     def perform_create(self, serializer):
-        """***"""
+        """сохранение нового экземпляра объекта"""
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
 
 
-    def get_queryset(self):
-        """***"""
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-        return title.reviews.all()
-
-
 class CommentViewSet(viewsets.ModelViewSet):
-    """***"""
+    """CommentViewSet"""
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -294,13 +288,17 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        """***"""
+        """получение всех комментариев"""
 
         review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
+        # не совсем понял зачем указывать тайтл?
+        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
         return review.comments.all()
 
     def perform_create(self, serializer):
-        """***"""
+        """сохранение нового экземпляра объекта"""
 
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        # не совсем понял зачем указывать тайтл?
+        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
         serializer.save(review=review, author=self.request.user)
