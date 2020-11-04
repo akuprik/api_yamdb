@@ -290,15 +290,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """получение всех комментариев"""
 
-        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
-        # не совсем понял зачем указывать тайтл?
-        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"), title=self.kwargs.get("title_id"))
         return review.comments.all()
 
     def perform_create(self, serializer):
         """сохранение нового экземпляра объекта"""
 
-        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
-        # не совсем понял зачем указывать тайтл?
-        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'), title=self.kwargs.get("title_id"))
         serializer.save(review=review, author=self.request.user)
