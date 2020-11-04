@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser, User
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -66,7 +67,10 @@ class Title(models.Model):
                                 )
     description = models.TextField('description', null=True)
     year = models.PositiveIntegerField('year')
-
+    def correct_year(self, year):
+        if year > 2020:
+            raise ValidationError("Год указан некорректно")
+    
 
 class Review(models.Model):
     """Модель Review"""

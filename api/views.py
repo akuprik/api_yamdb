@@ -148,48 +148,9 @@ class GetAuthPairToken(GetConfirmCodeView):
                     )
 
 
-class GetConfirmCodeView(views.APIView):
-    """
-    Запрос на получение confirmation_code,
-    если есть такой пользователь
-    отправляем на присланный EMAIL код подтвержения.
-    Код подтверждения формируется как токен JWT с payload пользователя
-    """
-    serializer_class = EmailSerializer
-
-    def action(self, user, token, serializer):
-        """
-        Формирует код подтвержения, в него вставляется payload
-        пользователя user, отправляет EMAIL,
-        возвращаеет email в ответ.
-        """
-        confirmation_code = token.encode(user.get_payload())
-        send_mail_to_email(
-            user.email,
-            'Confirmation code',
-            f'Confirmation code is\n{confirmation_code}\n '
-            )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        """
-        проверяет полноту данных запроса,
-        по email находит в БД пользователя user,
-        если такой находится выполняет действия action
-        """
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            user = get_object_or_404(User, email=request.data.get('email'))
-            token = TokenBackend(
-                SIMPLE_JWT['ALGORITHM'],
-                signing_key=SIMPLE_JWT['SIGNING_KEY'],
-            )
-            return self.action(user, token, serializer)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class TitleViewSet(viewsets.ModelViewSet):
-    """C пермишенами разобраться"""
+    """Определяем методы работы с сериализаторами, их
+    будет два, в зависимости от метода"""
 
     queryset = Title.objects.all()
     permission_classes = [IsAdminOrReadOnly]
@@ -202,19 +163,22 @@ class TitleViewSet(viewsets.ModelViewSet):
             return TitleSerializer_get
         return TitleSerializer_post
 
-    def get_serializer_class(self):
-        if self.action == 'retrieve' or self.action == 'list':
-            return TitleSerializer_get
-        return TitleSerializer_post
 
-
-class CategoryViewSet(
-                    viewsets.GenericViewSet,
+class IndividualViewSet(
+                   viewsets.GenericViewSet,
                     mixins.CreateModelMixin,
                     mixins.DestroyModelMixin,
                     mixins.ListModelMixin,
                     ):
-    """C пермишенами разобраться"""
+    """используем класс для настройки применяемых методов"""
+    pass
+
+
+class CategoryViewSet(IndividualViewSet):
+    """
+    применяем класс IndividualViewSet для определения
+    необходимых Mixins
+    """
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -225,12 +189,11 @@ class CategoryViewSet(
     search_fields = ['name']
 
 
-class GenreViewSet(viewsets.GenericViewSet,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   ):
-    """C пермишенами разобраться"""
+class GenreViewSet(IndividualViewSet):
+    """
+    применяем класс IndividualViewSet для определения
+    необходимых Mixins
+    """
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
