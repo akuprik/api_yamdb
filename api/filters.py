@@ -19,7 +19,6 @@ class TitleFilter(filters.FilterSet):
         field_name="name", lookup_expr="contains"
     )
 
-
     class Meta:
 
         model = Title

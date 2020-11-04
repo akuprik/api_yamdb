@@ -18,13 +18,34 @@ class UserSerializer(serializers.ModelSerializer):
     Сериализатор для модели User
     """
     role = serializers.ChoiceField(choices=User.ROLE_LIST)
-    username = serializers.CharField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
-    email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
+    username = serializers.CharField(
+                        required=True,
+                        validators=[
+                            UniqueValidator(
+                                queryset=User.objects.all()
+                                )
+                            ]
+                        )
+    email = serializers.EmailField(
+                        required=True,
+                        validators=[
+                            UniqueValidator(
+                                queryset=User.objects.all()
+                                )
+                            ]
+                        )
     bio = serializers.CharField(default='', allow_blank=True, )
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'bio', 'email', 'role', )
+        fields = (
+                'first_name',
+                'last_name',
+                'username',
+                'bio',
+                'email',
+                'role',
+                )
 
 
 class EmailSerializer(serializers.Serializer):
@@ -61,13 +82,20 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer_get(serializers.ModelSerializer):
-
     rating = serializers.SerializerMethodField()
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
     class Meta:
-        fields = ("id", "name", "year", "rating", "description", "genre", "category")
+        fields = (
+                "id",
+                "name",
+                "year",
+                "rating",
+                "description",
+                "genre",
+                "category"
+                )
         model = Title
 
     def get_rating(self, obj):
@@ -78,7 +106,6 @@ class TitleSerializer_get(serializers.ModelSerializer):
 
 
 class TitleSerializer_post(serializers.ModelSerializer):
-
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         slug_field="slug",
@@ -103,7 +130,10 @@ class TitleSerializer_post(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор для Review"""
 
-    author = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    author = serializers.SlugRelatedField(
+                            slug_field='username',
+                            read_only=True
+                            )
 
     def validate(self, data):
         """проверка на наличие оценки у ревью"""
@@ -119,6 +149,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
     class Meta:
+        fields = ('title', 'text', 'author', 'score', 'pub_date',)
         model = Review
         fields = '__all__'
         extra_kwargs = {'title': {'required': False}}
@@ -130,5 +161,5 @@ class CommentSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
-        model = Comment
         fields = '__all__'
+        model = Comment

@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.db import models
-from django.contrib.auth.models import User, AbstractUser
+from django.contrib.auth.models import AbstractUser, User
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 
 class CustomUser(AbstractUser):
@@ -23,7 +24,11 @@ class CustomUser(AbstractUser):
         """
         Полезная нагрузка для формирования confirmation_code
         """
-        return {'user_id': self.id, 'email': self.email, 'username': self.username}
+        return {
+            'user_id': self.id,
+            'email': self.email,
+            'username': self.username
+            }
 
     class Meta:
         ordering = ("username",)
@@ -50,11 +55,22 @@ class Title(models.Model):
     """Модель Title"""
 
     name = models.TextField('name')
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='titles')
-    genre = models.ManyToManyField(Genre, blank=True, related_name="genres",)
+    category = models.ForeignKey(
+                                Category,
+                                on_delete=models.SET_NULL,
+                                null=True, related_name='titles'
+                                )
+    genre = models.ManyToManyField(
+                                Genre,
+                                blank=True,
+                                related_name="genres",
+                                )
     description = models.TextField('description', null=True)
     year = models.PositiveIntegerField('year')
-
+    def correct_year(self, year):
+        if year > 2020:
+            raise ValidationError("Год указан некорректно")
+    
 
 class Review(models.Model):
     """Создание модели Review"""
