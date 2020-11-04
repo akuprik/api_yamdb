@@ -27,15 +27,13 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return (
-            self.role == self.RoleList.ADMIN
-            or self.is_superuser
+            self.role == self.RoleList.ADMIN or self.is_superuser
             )
 
     @property
     def is_moderator(self):
         return (
-            self.is_admin
-            or self.role == self.RoleList.MODERATOR
+            self.is_admin or self.role == self.RoleList.MODERATOR
             )
 
     def get_payload(self):
@@ -84,10 +82,11 @@ class Title(models.Model):
                                 )
     description = models.TextField('description', null=True)
     year = models.PositiveIntegerField('year')
+
     def correct_year(self, year):
         if year > 2020:
             raise ValidationError("Год указан некорректно")
-    
+
 
 class Review(models.Model):
     """Создание модели Review"""

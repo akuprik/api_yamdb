@@ -3,12 +3,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
 
-
-from .models import (
-    Title, Review,
-    Comment, User,
-    Category, Genre,
-)
+from .models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -144,7 +139,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         ):
             raise serializers.ValidationError('Assessment exists!')
         return data
-
 
     class Meta:
         model = Review
