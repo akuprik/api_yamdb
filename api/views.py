@@ -152,7 +152,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Определяем методы работы с сериализаторами, их
     будет два, в зависимости от метода"""
 
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend]
