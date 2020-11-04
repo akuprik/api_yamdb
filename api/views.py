@@ -1,21 +1,18 @@
-from rest_framework import (
-    viewsets, filters,
-    mixins, status, views,
-)
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.response import Response
-from rest_framework.viewsets import ViewSetMixin
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly
-)
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.backends import TokenBackend
-from rest_framework.decorators import action
-from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404, render
 from django.core.mail import send_mail
-from api_yamdb.settings import SIMPLE_JWT
+from django.shortcuts import get_object_or_404, render
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import (filters, mixins, status,
+                            views, viewsets)
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from rest_framework_simplejwt.backends import TokenBackend
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from api_yamdb.settings import SIMPLE_JWT, EMAIL_YAMDB
+
 
 from .filters import TitleFilter
 from .user_action_permissions import IsAdministratorOrSuperUser
@@ -39,7 +36,7 @@ def send_mail_to_email(to, subject, body):
     send_mail(
         subject=subject,
         message=body,
-        from_email='a@ya.ru',
+        from_email=EMAIL_YAMDB,
         recipient_list=[to]
         )
 
@@ -106,7 +103,7 @@ class GetConfirmCodeView(views.APIView):
         если такой находится выполняет действия action
         """
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             user = get_object_or_404(User, email=request.data.get('email'))
             token = TokenBackend(
                 SIMPLE_JWT['ALGORITHM'],

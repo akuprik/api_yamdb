@@ -5,20 +5,38 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
-class CustomUser(AbstractUser):
+class User(AbstractUser):
     """
     Модель пользователя с добавленными полями
     и переопределенным email, требуется как уникальное,
     по нему идентифицируется пользователь
     """
     email = models.EmailField(unique=True, null=False)
-    ROLE_LIST = (
-        ('user', 'Простой пользователь'),
-        ('moderator', 'Пользователь для модерации'),
-        ('admin', 'Администратор сайта'),
+
+    class RoleList(models.TextChoices):
+        USER = 'user', 'Простой пользователь'
+        MODERATOR = 'moderator', 'Пользователь для модерации'
+        ADMIN = 'admin', 'Администратор сайта'
+
+    role = models.CharField(
+        max_length=128, choices=RoleList.choices,
+        default=RoleList.USER
         )
-    role = models.CharField(max_length=9, choices=ROLE_LIST, default='user')
     bio = models.TextField(default='')
+
+    @property
+    def is_admin(self):
+        return (
+            self.role == self.RoleList.ADMIN
+            or self.is_superuser
+            )
+
+    @property
+    def is_moderator(self):
+        return (
+            self.is_admin
+            or self.role == self.RoleList.MODERATOR
+            )
 
     def get_payload(self):
         """
@@ -27,14 +45,13 @@ class CustomUser(AbstractUser):
         return {
             'user_id': self.id,
             'email': self.email,
-            'username': self.username
+            'username': self.username,
             }
 
     class Meta:
         ordering = ("username",)
-
-
-User = get_user_model()
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
 
 
 class Category(models.Model):

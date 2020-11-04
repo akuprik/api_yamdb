@@ -17,12 +17,9 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     """
     Разрешения изменений модераторам и админам
     """
-
     def has_object_permission(self, request, view, obj):
         return (
             (obj.author == request.user)
             or request.method in permissions.SAFE_METHODS
-            or request.user.role in (
-                'moderator',
-                'admin',
+            or request.user.is_moderator
             )
