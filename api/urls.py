@@ -21,21 +21,26 @@ v1_router.register(
     )
 
 
-urlpatterns = [
+authpatterns = [
     path(
-        'v1/auth/email/',
+        'email/',
         GetConfirmCodeView.as_view(),
         name='confirmation_code'
-        ),
+    ),
     path(
-        'v1/auth/token/',
+        'token/',
         GetAuthPairToken.as_view(),
         name='token_obtain_pair'
-        ),
+    ),
     path(
-        'v1/auth/token/refresh/',
+        'token/refresh/',
         TokenRefreshView.as_view(),
         name='token_refresh'
-        ),
+    ),
+
+]
+
+urlpatterns = [
+    path('v1/auth/', include(authpatterns)),
     path('v1/', include(v1_router.urls)),
     ]

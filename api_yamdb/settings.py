@@ -41,8 +41,7 @@ INSTALLED_APPS = [
     'api',
 ]
 
-AUTH_USER_MODEL = 'api.CustomUser'  # новое
-
+AUTH_USER_MODEL = 'api.User'  # новое
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -131,11 +130,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-     'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
         ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-        'PAGE_SIZE': 5,
+    'PAGE_SIZE': 5,
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ]
@@ -169,3 +168,4 @@ SIMPLE_JWT = {
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+EMAIL_YAMDB = 'yamdb@ya.ru'

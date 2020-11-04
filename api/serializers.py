@@ -1,8 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from rest_framework.validators import UniqueValidator
 
 from .models import Category, Comment, Genre, Review, Title, User
 
@@ -11,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     """
     Сериализатор для модели User
     """
-    role = serializers.ChoiceField(choices=User.ROLE_LIST)
+    role = serializers.ChoiceField(choices=User.RoleList)
     username = serializers.CharField(
                         required=True,
                         validators=[
@@ -111,8 +110,8 @@ class TitleSerializer_post(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ("id", "name", "year", "description", "genre", "category")
         model = Title
+        fields = ("id", "name", "year", "description", "genre", "category",)
 
     def get_rating(self, obj):
         rating = obj.reviews.all().aggregate(Avg('score')).get('score__avg')
@@ -141,7 +140,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         return data
 
     class Meta:
-        fields = ('title', 'text', 'author', 'score', 'pub_date',)
         model = Review
         fields = '__all__'
         extra_kwargs = {'title': {'required': False}}
