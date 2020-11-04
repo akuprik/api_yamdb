@@ -1,32 +1,33 @@
-from functools import partial
-
-import django_filters.rest_framework
-from django.core.mail import send_mail
-from django.db.models import Avg
-from django.shortcuts import get_object_or_404, render
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import (filters, generics, mixins, permissions, status,
-                            views, viewsets)
-from rest_framework.decorators import action
+from rest_framework import (
+    viewsets, filters,
+    mixins, status, views,
+)
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSetMixin
-from rest_framework_simplejwt.backends import TokenBackend
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from rest_framework_simplejwt.backends import TokenBackend
+from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404, render
+from django.core.mail import send_mail
 from api_yamdb.settings import SIMPLE_JWT
 
 from .filters import TitleFilter
-from .models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
-from .serializers import (CategorySerializer, CommentSerializer,
-                          EmailSerializer, GenreSerializer,
-                          GetAccessParTokenSerializer, ReviewSerializer,
-                          TitleSerializer_get, TitleSerializer_post,
-                          UserSerializer)
 from .user_action_permissions import IsAdministratorOrSuperUser
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+from .models import User, Title, Comment, Review, Category, Genre
+from .serializers import (
+    CommentSerializer, ReviewSerializer,
+    UserSerializer, EmailSerializer,
+    GetAccessParTokenSerializer, CategorySerializer,
+    GenreSerializer, TitleSerializer_get, TitleSerializer_post,
+)
+from functools import partial
 
 
 def send_mail_to_email(to, subject, body):
@@ -205,7 +206,7 @@ class GenreViewSet(IndividualViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """***"""
+    """ReviewViewSet"""
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -217,25 +218,25 @@ class ReviewViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
     def get_serializer_context(self):
-        """передача дополнительных аргументов"""
+        """получение дополнительных аргументов"""
         context = super(ReviewViewSet, self).get_serializer_context()
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         context.update({'title': title})
         return context
 
-    def perform_create(self, serializer):
-        """***"""
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        serializer.save(author=self.request.user, title=title)
-
     def get_queryset(self):
-        """***"""
+        """получение ревью на тайтл"""
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         return title.reviews.all()
 
+    def perform_create(self, serializer):
+        """сохранение нового экземпляра объекта"""
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        serializer.save(author=self.request.user, title=title)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """***"""
+    """CommentViewSet"""
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -246,13 +247,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     ]
 
     def get_queryset(self):
-        """***"""
+        """получение всех комментариев"""
 
-        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"), title=self.kwargs.get("title_id"))
         return review.comments.all()
 
     def perform_create(self, serializer):
-        """***"""
+        """сохранение нового экземпляра объекта"""
 
-        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'), title=self.kwargs.get("title_id"))
         serializer.save(review=review, author=self.request.user)

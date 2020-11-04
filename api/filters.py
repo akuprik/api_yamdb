@@ -4,7 +4,7 @@ from .models import Title
 
 
 class TitleFilter(filters.FilterSet):
-    """Фильтр по указанным полям, который применяем для поиска по БД"""
+    """Фильтр для Title"""
 
     genre = filters.CharFilter(
         field_name="genre__slug"
@@ -20,5 +20,6 @@ class TitleFilter(filters.FilterSet):
     )
 
     class Meta:
+
         model = Title
         fields = ["genre", "category", "year", "name"]
