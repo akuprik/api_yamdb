@@ -1,4 +1,6 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser, User
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -82,56 +84,64 @@ class Title(models.Model):
                                 )
     description = models.TextField('description', null=True)
     year = models.PositiveIntegerField('year')
-
+    def correct_year(self, year):
+        if year > 2020:
+            raise ValidationError("Год указан некорректно")
+    
 
 class Review(models.Model):
-    """Модель Review"""
+    """Создание модели Review"""
 
     title = models.ForeignKey(
-                        Title,
-                        on_delete=models.CASCADE,
-                        null=True,
-                        related_name='reviews'
-                        )
-    text = models.TextField('text', null=False)
+        Title,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='reviews',
+    )
+    text = models.TextField(
+        'text',
+        null=False,
+    )
     author = models.ForeignKey(
-                            User,
-                            on_delete=models.CASCADE,
-                            null=True,
-                            related_name='reviews'
-                            )
-    score = models.PositiveIntegerField(
-                            'score',
-                            validators=[
-                                        MinValueValidator(1),
-                                        MaxValueValidator(10)
-                                        ],
-                            null=False,
-                            )
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='reviews',
+    )
+    score = models.PositiveSmallIntegerField(
+        verbose_name='score',
+        validators=[
+            MinValueValidator(1, message='Min value 1',),
+            MaxValueValidator(10, message='Max value 10',)
+        ],
+        null=False,
+    )
     pub_date = models.DateTimeField(
-                            'Date of publication',
-                            auto_now_add=True
-                            )
+        'Date of publication',
+        auto_now_add=True,
+    )
 
 
 class Comment(models.Model):
-    """Модель Comment"""
+    """Создание модели Comment"""
 
     review = models.ForeignKey(
-                            Review,
-                            on_delete=models.CASCADE,
-                            null=True,
-                            related_name='comments'
-                            )
-    text = models.TextField('text')
+        Review,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='comments',
+    )
+    text = models.TextField(
+        'text',
+    )
     author = models.ForeignKey(
-                            User,
-                            on_delete=models.CASCADE,
-                            null=True,
-                            related_name='comments'
-                            )
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='comments',
+    )
     pub_date = models.DateTimeField(
-                            'Date of publication',
-                            auto_now_add=True,
-                            db_index=True
-                            )
+        'Date of publication',
+        auto_now_add=True,
+        db_index=True,
+    )

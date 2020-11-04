@@ -1,5 +1,5 @@
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (filters, mixins, status,
                             views, viewsets)
@@ -13,15 +13,18 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from api_yamdb.settings import SIMPLE_JWT, EMAIL_YAMDB
 
+
 from .filters import TitleFilter
-from .models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
-from .serializers import (CategorySerializer, CommentSerializer,
-                          EmailSerializer, GenreSerializer,
-                          GetAccessParTokenSerializer, ReviewSerializer,
-                          TitleSerializer_get, TitleSerializer_post,
-                          UserSerializer)
 from .user_action_permissions import IsAdministratorOrSuperUser
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+from .models import User, Title, Comment, Review, Category, Genre
+from .serializers import (
+    CommentSerializer, ReviewSerializer,
+    UserSerializer, EmailSerializer,
+    GetAccessParTokenSerializer, CategorySerializer,
+    GenreSerializer, TitleSerializer_get, TitleSerializer_post,
+)
+from functools import partial
 
 
 def send_mail_to_email(to, subject, body):
@@ -144,9 +147,10 @@ class GetAuthPairToken(GetConfirmCodeView):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """C пермишенами разобраться"""
+    """Определяем методы работы с сериализаторами, их
+    будет два, в зависимости от метода"""
 
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend]
@@ -158,13 +162,21 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer_post
 
 
-class CategoryViewSet(
-                    viewsets.GenericViewSet,
+class IndividualViewSet(
+                   viewsets.GenericViewSet,
                     mixins.CreateModelMixin,
                     mixins.DestroyModelMixin,
                     mixins.ListModelMixin,
                     ):
-    """C пермишенами разобраться"""
+    """используем класс для настройки применяемых методов"""
+    pass
+
+
+class CategoryViewSet(IndividualViewSet):
+    """
+    применяем класс IndividualViewSet для определения
+    необходимых Mixins
+    """
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -175,12 +187,11 @@ class CategoryViewSet(
     search_fields = ['name']
 
 
-class GenreViewSet(viewsets.GenericViewSet,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   ):
-    """C пермишенами разобраться"""
+class GenreViewSet(IndividualViewSet):
+    """
+    применяем класс IndividualViewSet для определения
+    необходимых Mixins
+    """
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -192,7 +203,7 @@ class GenreViewSet(viewsets.GenericViewSet,
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """***"""
+    """ReviewViewSet"""
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
@@ -204,25 +215,25 @@ class ReviewViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
     def get_serializer_context(self):
-        """передача дополнительных аргументов"""
+        """получение дополнительных аргументов"""
         context = super(ReviewViewSet, self).get_serializer_context()
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         context.update({'title': title})
         return context
 
-    def perform_create(self, serializer):
-        """***"""
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        serializer.save(author=self.request.user, title=title)
-
     def get_queryset(self):
-        """***"""
+        """получение ревью на тайтл"""
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         return title.reviews.all()
 
+    def perform_create(self, serializer):
+        """сохранение нового экземпляра объекта"""
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        serializer.save(author=self.request.user, title=title)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """***"""
+    """CommentViewSet"""
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -233,13 +244,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     ]
 
     def get_queryset(self):
-        """***"""
+        """получение всех комментариев"""
 
-        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"))
+        review = get_object_or_404(Review, pk=self.kwargs.get("review_id"), title=self.kwargs.get("title_id"))
         return review.comments.all()
 
     def perform_create(self, serializer):
-        """***"""
+        """сохранение нового экземпляра объекта"""
 
-        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
+        review = get_object_or_404(Review, pk=self.kwargs.get('review_id'), title=self.kwargs.get("title_id"))
         serializer.save(review=review, author=self.request.user)
