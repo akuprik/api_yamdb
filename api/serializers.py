@@ -15,17 +15,17 @@ class UserSerializer(serializers.ModelSerializer):
                         required=True,
                         validators=[
                             UniqueValidator(
-                                queryset=User.objects.all()
-                                )
-                            ]
+                                queryset=User.objects.all(),
+                                ),
+                            ],
                         )
     email = serializers.EmailField(
                         required=True,
                         validators=[
                             UniqueValidator(
-                                queryset=User.objects.all()
-                                )
-                            ]
+                                queryset=User.objects.all(),
+                                ),
+                            ],
                         )
     bio = serializers.CharField(default='', allow_blank=True, )
 
@@ -45,49 +45,53 @@ class EmailSerializer(serializers.Serializer):
     """
     Сериализатор запроса для получения confirmation_code
     """
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField(required=True, )
 
 
 class GetAccessParTokenSerializer(serializers.Serializer):
     """
     Сериализатор запроса токена доступа
     """
-    email = serializers.EmailField(required=True)
-    confirmation_code = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True, )
+    confirmation_code = serializers.CharField(required=True, )
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    """Сериализатор для Category"""
+    """
+    Сериализатор для Category
+    """
 
     class Meta:
-        fields = ('name', 'slug',)
+        fields = ('name', 'slug', )
         model = Category
         lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    """Сериализатор для Genre"""
+    """
+    Сериализатор для Genre
+    """
 
     class Meta:
-        fields = ('name', 'slug',)
+        fields = ('name', 'slug', )
         model = Genre
         lookup_field = 'slug'
 
 
 class TitleSerializer_get(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
-    genre = GenreSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True, )
+    category = CategorySerializer(read_only=True, )
 
     class Meta:
         fields = (
-                "id",
-                "name",
-                "year",
-                "rating",
-                "description",
-                "genre",
-                "category"
+                'id',
+                'name',
+                'year',
+                'rating',
+                'description',
+                'genre',
+                'category',
                 )
         model = Title
 
@@ -101,17 +105,17 @@ class TitleSerializer_get(serializers.ModelSerializer):
 class TitleSerializer_post(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
-        slug_field="slug",
+        slug_field='slug',
         many=True,
         )
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
-        slug_field="slug",
-    )
+        slug_field='slug',
+        )
 
     class Meta:
         model = Title
-        fields = ("id", "name", "year", "description", "genre", "category",)
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
 
     def get_rating(self, obj):
         rating = obj.reviews.all().aggregate(Avg('score')).get('score__avg')
@@ -121,35 +125,38 @@ class TitleSerializer_post(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    """Сериализатор для Review"""
-
+    """
+    Сериализатор для Review
+    """
     author = serializers.SlugRelatedField(
                             slug_field='username',
                             read_only=True
                             )
 
     def validate(self, data):
-        """проверка на наличие оценки у ревью"""
-
+        """
+        проверка на наличие оценки у ревью
+        """
         title = self.context.get('title')
         request = self.context.get('request')
         if (
             request.method != 'PATCH' and
-            Review.objects.filter(title=title, author=request.user).exists()
-        ):
-            raise serializers.ValidationError('Assessment exists!')
+            Review.objects.filter(title=title, author=request.user, ).exists()
+            ):
+            raise serializers.ValidationError('Assessment exists!', )
         return data
 
     class Meta:
         model = Review
         fields = '__all__'
-        extra_kwargs = {'title': {'required': False}}
+        extra_kwargs = {'title': {'required': False, }, }
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """Сериализатор для Comment"""
-
-    author = SlugRelatedField(slug_field='username', read_only=True)
+    """
+    Сериализатор для Comment
+    """
+    author = SlugRelatedField(slug_field='username', read_only=True, )
 
     class Meta:
         fields = '__all__'

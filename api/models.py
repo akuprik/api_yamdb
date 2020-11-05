@@ -1,5 +1,4 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -11,18 +10,18 @@ class User(AbstractUser):
     и переопределенным email, требуется как уникальное,
     по нему идентифицируется пользователь
     """
-    email = models.EmailField(unique=True, null=False)
+    email = models.EmailField(unique=True, null=False, )
 
     class RoleList(models.TextChoices):
-        USER = 'user', 'Простой пользователь'
-        MODERATOR = 'moderator', 'Пользователь для модерации'
-        ADMIN = 'admin', 'Администратор сайта'
+        USER = 'user'
+        MODERATOR = 'moderator'
+        ADMIN = 'admin'
 
     role = models.CharField(
         max_length=128, choices=RoleList.choices,
-        default=RoleList.USER
+        default=RoleList.USER,
         )
-    bio = models.TextField(default='')
+    bio = models.TextField(default='', )
 
     @property
     def is_admin(self):
@@ -47,7 +46,7 @@ class User(AbstractUser):
             }
 
     class Meta:
-        ordering = ("username",)
+        ordering = ('username', )
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 
@@ -55,37 +54,37 @@ class User(AbstractUser):
 class Category(models.Model):
     """Categories: films, audio or books"""
 
-    name = models.TextField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
+    name = models.TextField(max_length=200, )
+    slug = models.SlugField(max_length=200, unique=True, )
 
 
 class Genre(models.Model):
     """Genres: comedy, thriller etc"""
 
-    name = models.TextField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True)
+    name = models.TextField(max_length=200, )
+    slug = models.SlugField(max_length=200, unique=True, )
 
 
 class Title(models.Model):
     """Модель Title"""
 
-    name = models.TextField('name')
+    name = models.TextField('name', )
     category = models.ForeignKey(
                                 Category,
                                 on_delete=models.SET_NULL,
-                                null=True, related_name='titles'
+                                null=True, related_name='titles',
                                 )
     genre = models.ManyToManyField(
                                 Genre,
                                 blank=True,
-                                related_name="genres",
+                                related_name='genres',
                                 )
-    description = models.TextField('description', null=True)
-    year = models.PositiveIntegerField('year')
+    description = models.TextField('description', null=True, )
+    year = models.PositiveIntegerField('year', )
 
     def correct_year(self, year):
         if year > 2020:
-            raise ValidationError("Год указан некорректно")
+            raise ValidationError('Год указан некорректно')
 
 
 class Review(models.Model):
@@ -96,29 +95,29 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         null=True,
         related_name='reviews',
-    )
+        )
     text = models.TextField(
         'text',
         null=False,
-    )
+        )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         null=True,
         related_name='reviews',
-    )
+        )
     score = models.PositiveSmallIntegerField(
         verbose_name='score',
         validators=[
             MinValueValidator(1, message='Min value 1',),
             MaxValueValidator(10, message='Max value 10',)
-        ],
+            ],
         null=False,
-    )
+        )
     pub_date = models.DateTimeField(
         'Date of publication',
         auto_now_add=True,
-    )
+        )
 
 
 class Comment(models.Model):
@@ -129,18 +128,18 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         null=True,
         related_name='comments',
-    )
+        )
     text = models.TextField(
         'text',
-    )
+        )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         null=True,
         related_name='comments',
-    )
+        )
     pub_date = models.DateTimeField(
         'Date of publication',
         auto_now_add=True,
         db_index=True,
-    )
+        )
