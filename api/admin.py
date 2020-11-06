@@ -5,33 +5,33 @@ from .models import User, Title, Category, Comment, Review, Genre
 
 
 class TitleAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'category', 'description', 'year', )
-    search_fields = ('name', )
-    list_filter = ('year', )
+    list_display = ('pk', 'name', 'category', 'description', 'year')
+    search_fields = ('name',)
+    list_filter = ('year',)
     empty_value_display = '-пусто-'
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'slug', )
+    list_display = ('pk', 'name', 'slug')
     empty_value_display = '-пусто-'
 
 
 class GenreAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'slug', )
+    list_display = ('pk', 'name', 'slug')
     empty_value_display = '-пусто-'
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'review', 'pub_date', 'author', 'text', )
-    search_fields = ('text', 'author', )
-    list_filter = ('author', )
+    list_display = ('pk', 'review', 'pub_date', 'author', 'text')
+    search_fields = ('text', 'author')
+    list_filter = ('author',)
     empty_value_display = '-пусто-'
 
 
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'title', 'pub_date', 'author', 'text', 'score', )
-    search_fields = ('text', 'author', )
-    list_filter = ('author', )
+    list_display = ('pk', 'title', 'pub_date', 'author', 'text', 'score')
+    search_fields = ('text', 'author')
+    list_filter = ('author',)
     empty_value_display = '-пусто-'
 
 

@@ -10,7 +10,7 @@ class User(AbstractUser):
     и переопределенным email, требуется как уникальное,
     по нему идентифицируется пользователь
     """
-    email = models.EmailField(unique=True, null=False, )
+    email = models.EmailField(unique=True, null=False)
 
     class RoleList(models.TextChoices):
         USER = 'user'
@@ -21,7 +21,7 @@ class User(AbstractUser):
         max_length=128, choices=RoleList.choices,
         default=RoleList.USER,
         )
-    bio = models.TextField(default='', )
+    bio = models.TextField(default='')
 
     @property
     def is_admin(self):
@@ -46,7 +46,7 @@ class User(AbstractUser):
             }
 
     class Meta:
-        ordering = ('username', )
+        ordering = ('username',)
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 
@@ -54,21 +54,21 @@ class User(AbstractUser):
 class Category(models.Model):
     """Categories: films, audio or books"""
 
-    name = models.TextField(max_length=200, )
-    slug = models.SlugField(max_length=200, unique=True, )
+    name = models.TextField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True)
 
 
 class Genre(models.Model):
     """Genres: comedy, thriller etc"""
 
-    name = models.TextField(max_length=200, )
-    slug = models.SlugField(max_length=200, unique=True, )
+    name = models.TextField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True)
 
 
 class Title(models.Model):
     """Модель Title"""
 
-    name = models.TextField('name', )
+    name = models.TextField('name')
     category = models.ForeignKey(
                                 Category,
                                 on_delete=models.SET_NULL,
@@ -79,8 +79,8 @@ class Title(models.Model):
                                 blank=True,
                                 related_name='genres',
                                 )
-    description = models.TextField('description', null=True, )
-    year = models.PositiveIntegerField('year', )
+    description = models.TextField('description', null=True)
+    year = models.PositiveIntegerField('year')
 
     def correct_year(self, year):
         if year > 2020:
@@ -109,8 +109,8 @@ class Review(models.Model):
     score = models.PositiveSmallIntegerField(
         verbose_name='score',
         validators=[
-            MinValueValidator(1, message='Min value 1',),
-            MaxValueValidator(10, message='Max value 10',)
+            MinValueValidator(1, message='Min value 1'),
+            MaxValueValidator(10, message='Max value 10'),
             ],
         null=False,
         )
@@ -129,9 +129,7 @@ class Comment(models.Model):
         null=True,
         related_name='comments',
         )
-    text = models.TextField(
-        'text',
-        )
+    text = models.TextField('text')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

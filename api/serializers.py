@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
                                 ),
                             ],
                         )
-    bio = serializers.CharField(default='', allow_blank=True, )
+    bio = serializers.CharField(default='', allow_blank=True)
 
     class Meta:
         model = User
@@ -45,15 +45,15 @@ class EmailSerializer(serializers.Serializer):
     """
     Сериализатор запроса для получения confirmation_code
     """
-    email = serializers.EmailField(required=True, )
+    email = serializers.EmailField(required=True)
 
 
 class GetAccessParTokenSerializer(serializers.Serializer):
     """
     Сериализатор запроса токена доступа
     """
-    email = serializers.EmailField(required=True, )
-    confirmation_code = serializers.CharField(required=True, )
+    email = serializers.EmailField(required=True)
+    confirmation_code = serializers.CharField(required=True)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -62,7 +62,7 @@ class CategorySerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        fields = ('name', 'slug', )
+        fields = ('name', 'slug',)
         model = Category
         lookup_field = 'slug'
 
@@ -73,15 +73,15 @@ class GenreSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        fields = ('name', 'slug', )
+        fields = ('name', 'slug',)
         model = Genre
         lookup_field = 'slug'
 
 
 class TitleSerializer_get(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
-    genre = GenreSerializer(many=True, read_only=True, )
-    category = CategorySerializer(read_only=True, )
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         fields = (
@@ -115,7 +115,10 @@ class TitleSerializer_post(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
+        fields = ('id', 'name', 'year',
+                  'description', 'genre',
+                  'category',
+                  )
 
     def get_rating(self, obj):
         rating = obj.reviews.all().aggregate(Avg('score')).get('score__avg')
@@ -130,7 +133,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     """
     author = serializers.SlugRelatedField(
                             slug_field='username',
-                            read_only=True
+                            read_only=True,
                             )
 
     def validate(self, data):
@@ -141,22 +144,23 @@ class ReviewSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if (
             request.method != 'PATCH' and
-            Review.objects.filter(title=title, author=request.user, ).exists()
-            ):
-            raise serializers.ValidationError('Assessment exists!', )
+            Review.objects.filter(title=title,
+                                  author=request.user,
+                                  ).exists()):
+            raise serializers.ValidationError('Assessment exists!')
         return data
 
     class Meta:
         model = Review
         fields = '__all__'
-        extra_kwargs = {'title': {'required': False, }, }
+        extra_kwargs = {'title': {'required': False}}
 
 
 class CommentSerializer(serializers.ModelSerializer):
     """
     Сериализатор для Comment
     """
-    author = SlugRelatedField(slug_field='username', read_only=True, )
+    author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
         fields = '__all__'
